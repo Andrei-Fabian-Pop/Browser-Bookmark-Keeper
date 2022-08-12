@@ -3,9 +3,9 @@
 help_function() {
     echo "Usage ./bookmark_parser.sh [arguments]"
     echo "Arguments:"
-	echo -e "-F\tuse firefox default location"
+	  echo -e "-F\tuse firefox default location"
     echo -e "-f\tfirefox bookmark file location"
-	echo -e "-C\tuse chrome default location"
+	  echo -e "-C\tuse chrome default location"
     echo -e "-c\tchrome bookmark file location"
     echo -e "-o\toutput file for the script (default: stdout)"
 }
@@ -19,16 +19,16 @@ print_entry() {
 	\"name\": $4,
 	\"btype\": $5,
 	\"url\": $6
-}" 
+},"
 }
 
 chrome_parser() {
-	jq '.roots[].children[] | .date_added, .guid, .id, .name, .type, .url' $chrome_link | while read line; do
-		date_added=$line; read line
-		guid=$line; read line
-		id=$line; read line
-		name=$line; read line
-		btype=$line; read line
+	jq '.roots[].children[] | .date_added, .guid, .id, .name, .type, .url' "$chrome_link" | while read -r line; do
+		date_added=$line; read -r line
+		guid=$line; read -r line
+		id=$line; read -r line
+		name=$line; read -r line
+		btype=$line; read -r line
 		url=$line
 
 		print_entry "$date_added" "$guid" "$id" "$name" "$btype" "$url"	
@@ -36,13 +36,13 @@ chrome_parser() {
 }
 
 firefox_parser() {
-	sqlite3 $firefox_link \
+	sqlite3 "$firefox_link" \
 	"SELECT moz_bookmarks.dateAdded, moz_bookmarks.guid, moz_bookmarks.id, moz_bookmarks.title, moz_bookmarks.type, moz_places.url
 	FROM moz_bookmarks 
 	LEFT OUTER JOIN moz_places 
 	ON moz_places.id = moz_bookmarks.fk 
 	WHERE moz_places.id = moz_bookmarks.fk" | while IFS='|' read -r date_added guid id title btype url; do
-		print_entry "$date_added" "$guid" "$id" "$name" "$btype" "$url"
+		print_entry "$date_added" "$guid" "$id" "$title" "$btype" "$url"
 	done
 }
 
@@ -80,11 +80,11 @@ if [[ -z $output_file ]]; then
 	fi
 else
 	if [[ $ch_flag -ne 0 ]]; then
-		chrome_parser > $output_file
+		chrome_parser > "$output_file"
 	fi
 
 	if [[ $ff_flag -ne 0 ]]; then
-		firefox_parser >> $output_file
+		firefox_parser >> "$output_file"
 	fi
 fi
 
